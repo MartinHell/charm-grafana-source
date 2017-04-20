@@ -11,7 +11,7 @@ options:
          - ppa:project2/ppa
   install_keys:
     default: |
-      - '7AD95B3F'
+      - '418A7F2FB0E1E6E7EABF6FE8C2E73424D59097AB'
     type: string
     description: |
       YAML list of GPG keys for installation sources, as a string. For apt repository
