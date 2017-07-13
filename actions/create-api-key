@@ -1,0 +1,58 @@
+#!/usr/bin/python3
+
+import requests
+import json
+from charmhelpers.core.hookenv import (
+    action_fail,
+    action_set,
+    action_get,
+    config,
+    log,
+)
+
+from charmhelpers.core import unitdata
+
+roles = ['Viewer', 'Editor', 'Read Only Editor', 'Admin']
+
+kv = unitdata.kv()
+if kv.get('grafana.admin_password'):
+    # print('Admin password: {}'.format(kv.get('grafana.admin_password')))
+    passwd = kv.get('grafana.admin_password')
+elif config('admin_password'):
+    passwd = config('admin_password')
+    # print('Admin password: {}'.format(config('admin_password')))
+else:
+    action_fail('ERROR! Unable to retrieve password.')
+    exit(0)
+
+grafana = "http://localhost:3000"
+api_auth = ('admin', passwd)
+key_name = action_get('keyname')
+key_role = action_get('keyrole')
+api_key_url = "/api/auth/keys"
+api_data = {"role": key_role, "name": key_name}
+keyfound = False
+
+if key_role not in roles:
+    action_fail("Role %s isn't valid, needs to be one of %s" % (key_role, roles))
+    exit(0)
+
+r = requests.get(grafana + api_key_url, auth=api_auth)
+keylist = json.loads(r.text)
+for k in keylist:
+    if k['name'] == key_name:
+        keyfound = True
+        action_fail("%s key found, not creating" % (key_name))
+        exit(0)
+
+if not keyfound:
+    r = requests.post(grafana + api_key_url, auth=api_auth, json=api_data)
+    api_key = json.loads(r.text)
+
+    # print("Key %s created, key is %s" % (api_key['name'], api_key['key']))
+    action_set({"key-name": api_key['name']})
+    action_set({"key-value": api_key['key']})
+    action_set({"key-role": key_role})
+
+    # Use this key in headers like Authorization: Bearer $KEY
+

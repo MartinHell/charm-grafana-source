@@ -6,3 +6,16 @@ import-dashboard:
       description: Contains the dashboard to be imported, in base64 encoded json format
   required: [dashboard]
   additionalProperties: false
+get-admin-password:
+  description: Retrieves the admin password, either auto generated or set in config
+create-api-key:
+  description: Create an api key given a keyname and a keyrole out of Viewer, Editor, Read Only Editor or Admin
+  params:
+    keyname:
+      type: string
+      description: Name of key to be created
+    keyrole:
+      type: string
+      description: Role for key, one of Viewer, Editor, Read Only Editor or Admin
+  required: [keyname, keyrole]
+  additionalProperties: false
