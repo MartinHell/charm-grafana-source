@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+# Create an api key for grafana, with a given name and role
 
 import requests
 import json
@@ -6,24 +7,17 @@ from charmhelpers.core.hookenv import (
     action_fail,
     action_set,
     action_get,
-    config,
-    log,
 )
 
-from charmhelpers.core import unitdata
+from grafana_utils import get_admin_password
 
-roles = ['Viewer', 'Editor', 'Read Only Editor', 'Admin']
+passwd = get_admin_password()
 
-kv = unitdata.kv()
-if kv.get('grafana.admin_password'):
-    # print('Admin password: {}'.format(kv.get('grafana.admin_password')))
-    passwd = kv.get('grafana.admin_password')
-elif config('admin_password'):
-    passwd = config('admin_password')
-    # print('Admin password: {}'.format(config('admin_password')))
-else:
+if passwd is None:
     action_fail('ERROR! Unable to retrieve password.')
     exit(0)
+
+roles = ['Viewer', 'Editor', 'Read Only Editor', 'Admin']
 
 grafana = "http://localhost:3000"
 api_auth = ('admin', passwd)
