@@ -127,3 +127,8 @@ options:
       Comma separated list of http(s) URLs where grafana plugin tarballs can be found.
       Example:
         install_plugins: http://my.company.com/packages/grafana/plugins/plugin-panel.tar.gz
+  http_proxy:
+    default: ""
+    type: string
+    description: |
+      Proxy URL to use for install_file
