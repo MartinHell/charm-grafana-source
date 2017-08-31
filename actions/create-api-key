@@ -8,14 +8,15 @@ from charmhelpers.core.hookenv import (
     action_set,
     action_get,
 )
+import sys
 
 from grafana_utils import get_admin_password
 
 passwd = get_admin_password()
 
 if passwd is None:
-    action_fail('ERROR! Unable to retrieve password.')
-    exit(0)
+    action_fail('Unable to retrieve password.')
+    sys.exit(0)
 
 roles = ['Viewer', 'Editor', 'Read Only Editor', 'Admin']
 
@@ -25,7 +26,6 @@ key_name = action_get('keyname')
 key_role = action_get('keyrole')
 api_key_url = "/api/auth/keys"
 api_data = {"role": key_role, "name": key_name}
-keyfound = False
 
 if key_role not in roles:
     action_fail("Role %s isn't valid, needs to be one of %s" % (key_role, roles))
@@ -35,18 +35,16 @@ r = requests.get(grafana + api_key_url, auth=api_auth)
 keylist = json.loads(r.text)
 for k in keylist:
     if k['name'] == key_name:
-        keyfound = True
         action_fail("%s key found, not creating" % (key_name))
-        exit(0)
+        sys.exit(0)
 
-if not keyfound:
-    r = requests.post(grafana + api_key_url, auth=api_auth, json=api_data)
-    api_key = json.loads(r.text)
+r = requests.post(grafana + api_key_url, auth=api_auth, json=api_data)
+api_key = json.loads(r.text)
 
-    # print("Key %s created, key is %s" % (api_key['name'], api_key['key']))
-    action_set({"key-name": api_key['name']})
-    action_set({"key-value": api_key['key']})
-    action_set({"key-role": key_role})
+# print("Key %s created, key is %s" % (api_key['name'], api_key['key']))
+action_set({"key-name": api_key['name']})
+action_set({"key-value": api_key['key']})
+action_set({"key-role": key_role})
 
-    # Use this key in headers like Authorization: Bearer $KEY
+# Use this key in headers like Authorization: Bearer $KEY
 
