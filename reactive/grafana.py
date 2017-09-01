@@ -44,12 +44,21 @@ def install_packages():
     config = hookenv.config()
     install_opts = ('install_sources', 'install_keys')
     hookenv.status_set('maintenance', 'Installing grafana')
+
+    if config.get('http_proxy'):
+        proxy = {"http": config.get('http_proxy'),
+                 "https": config.get('http_proxy'),
+                 }
+    else:
+        proxy = {}
+
     if config.changed('install_file') and config.get('install_file', False):
         hookenv.status_set('maintenance', 'Installing deb pkgs')
         fetch.apt_install(GRAFANA_DEPS)
         pkg_file = '/tmp/grafana.deb'
         with open(pkg_file, 'wb') as f:
-            r = requests.get(config.get('install_file'), stream=True)
+            r = requests.get(config.get('install_file'), stream=True,
+                             proxies=proxy)
             for block in r.iter_content(1024):
                 f.write(block)
         subprocess.check_call(['dpkg', '-i', pkg_file])
