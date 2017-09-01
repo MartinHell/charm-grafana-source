@@ -1,0 +1,50 @@
+#!/usr/bin/python3
+# Create an api key for grafana, with a given name and role
+
+import requests
+import json
+from charmhelpers.core.hookenv import (
+    action_fail,
+    action_set,
+    action_get,
+)
+import sys
+
+from grafana_utils import get_admin_password
+
+passwd = get_admin_password()
+
+if passwd is None:
+    action_fail('Unable to retrieve password.')
+    sys.exit(0)
+
+roles = ['Viewer', 'Editor', 'Read Only Editor', 'Admin']
+
+grafana = "http://localhost:3000"
+api_auth = ('admin', passwd)
+key_name = action_get('keyname')
+key_role = action_get('keyrole')
+api_key_url = "/api/auth/keys"
+api_data = {"role": key_role, "name": key_name}
+
+if key_role not in roles:
+    action_fail("Role %s isn't valid, needs to be one of %s" % (key_role, roles))
+    exit(0)
+
+r = requests.get(grafana + api_key_url, auth=api_auth)
+keylist = json.loads(r.text)
+for k in keylist:
+    if k['name'] == key_name:
+        action_fail("%s key found, not creating" % (key_name))
+        sys.exit(0)
+
+r = requests.post(grafana + api_key_url, auth=api_auth, json=api_data)
+api_key = json.loads(r.text)
+
+# print("Key %s created, key is %s" % (api_key['name'], api_key['key']))
+action_set({"key-name": api_key['name']})
+action_set({"key-value": api_key['key']})
+action_set({"key-role": key_role})
+
+# Use this key in headers like Authorization: Bearer $KEY
+
