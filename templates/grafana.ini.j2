@@ -85,7 +85,11 @@ root_url = {{ config.root_url }}
 ;reporting_enabled = true
 
 # Google Analytics universal tracking code, only enabled if you specify an id here
+{% if config.google_analytics_ua_id %}
+google_analytics_ua_id = {{ config.google_analytics_ua_id }}
+{% else %}
 ;google_analytics_ua_id =
+{% endif %}
 
 #################################### Security ####################################
 [security]

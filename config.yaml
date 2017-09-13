@@ -196,3 +196,8 @@ options:
     type: string
     description: |
       Proxy URL to use for install_file
+  google_analytics_ua_id:
+    default: ""
+    type: string
+    description: |
+      Google Universal Analytics ID per http://docs.grafana.org/installation/configuration/#google-analytics-ua-id
