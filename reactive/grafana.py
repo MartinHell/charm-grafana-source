@@ -109,9 +109,10 @@ def install_plugins():
 @hook('upgrade-charm')
 def upgrade_charm():
     hookenv.status_set('maintenance', 'Forcing package update and reconfiguration on upgrade-charm')
+    set_state('grafana.reconfigure')
+    hookenv.status_set('Maintenance', 'Reconfiguring')
     remove_state('grafana.installed')
     remove_state('grafana.configured')
-
 
 @hook('config-changed')
 def config_changed():
@@ -289,6 +290,23 @@ def configure_sources(relation):
         hookenv.log('Found datasource: {}'.format(str(ds)))
         # Ensure datasource is configured
         check_datasource(ds)
+
+@when('grafana.reconfigure')
+def reconfigure_grafana():
+    render(source=GRAFANA_INI_TMPL,
+           target=GRAFANA_INI,
+           context=settings,
+           owner='root', group='grafana',
+           perms=0o640,
+           )
+    if any_file_changed([GRAFANA_INI]):
+        msg = 'Restarting {}'.format(SVCNAME)
+        hookenv.log(msg)
+        hookenv.status_set('maintenance', msg)
+        host.service_restart(SVCNAME)
+    hookenv.status_set('active', 'Ready')
+    hookenv.status_set('active', 'Started {}'.format(SVCNAME))
+    remove_state('grafana.reconfigure')
 
 
 @when('grafana.started')
