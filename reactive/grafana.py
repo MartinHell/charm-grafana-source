@@ -110,7 +110,7 @@ def install_plugins():
 def upgrade_charm():
     hookenv.status_set('maintenance', 'Forcing package update and reconfiguration on upgrade-charm')
     set_state('grafana.reconfigure')
-    hookenv.status_set('Maintenance', 'Reconfiguring')
+    hookenv.status_set('maintenance', 'Reconfiguring')
     remove_state('grafana.installed')
     remove_state('grafana.configured')
 
