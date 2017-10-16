@@ -293,6 +293,8 @@ def configure_sources(relation):
 
 @when('grafana.reconfigure')
 def reconfigure_grafana():
+    config = hookenv.config()
+    settings = {'config': config}
     render(source=GRAFANA_INI_TMPL,
            target=GRAFANA_INI,
            context=settings,
