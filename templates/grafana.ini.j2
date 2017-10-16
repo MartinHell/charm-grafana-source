@@ -14,7 +14,7 @@ instance_name = {{ config.instance_name }}
 http_addr = 0.0.0.0
 
 # The http port  to use
-http_port = 3000
+http_port = {{ config.port }}
 
 # The public facing domain name used to access grafana from a browser
 ;domain = localhost
@@ -254,4 +254,3 @@ from_address = {{ config.smtp_from_address }}
 [dashboards.json]
 ;enabled = false
 ;path = /var/lib/grafana/dashboards
-
